@@ -17,6 +17,11 @@
 @media(max-width:1100px){.stats{grid-template-columns:repeat(2,minmax(0,1fr))}.content{padding:24px}.topbar{padding:0 24px}.cards-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.grid-main{grid-template-columns:1.2fr .9fr}}
 @media(max-width:850px){.sidebar{transform:translateX(-100%);box-shadow:18px 0 50px #0003}.sidebar.open{transform:translateX(0)}.main{margin:0}.mobile-menu{display:grid}.scrim.show{display:block;position:fixed;inset:0;background:#11182780;z-index:25}.grid-main{grid-template-columns:1fr}.login-screen{grid-template-columns:1fr}.login-story{display:none}.login-area{min-height:100vh}.login-card .brand{display:flex;padding:0 0 25px}}
 @media(max-width:620px){.topbar{height:65px;padding:0 13px}.top-title{font-size:15px}.content{padding:20px 13px 32px}.page-head{align-items:flex-start;flex-direction:column;gap:13px}.page-head h1{font-size:23px}.actions{width:100%}.actions .btn{flex:1}.stats{gap:9px}.stat{padding:14px 12px}.stat-value{font-size:20px}.stat-label{font-size:9px}.stat-icon{width:30px;height:30px}.stat-foot{font-size:9px}.grid-two{grid-template-columns:1fr}.cards-grid{grid-template-columns:1fr}.finance-grid{grid-template-columns:1fr}.panel-head{padding:16px 14px 0}.panel-body{padding:15px 14px}.panel-body.no-top{padding-top:0}.bar-chart{gap:7px}.bar-label{font-size:8px}.date{display:none}.top-actions{gap:5px}.icon-btn{width:32px;height:32px}.tool-row{align-items:stretch}.search{min-width:100%;max-width:none}.filters{width:100%}.filters select{flex:1;min-width:0}.form-grid{grid-template-columns:1fr}.form-grid .full{grid-column:auto}.modal-head{padding:18px 18px 14px}.modal form{padding:17px 18px 19px}.finance-hero{padding:19px}.finance-hero h2{font-size:24px}.finance-hero .stat-icon{display:none}.login-area{padding:25px 20px}.login-card h2{font-size:24px}.toast-host{right:10px;bottom:10px}}
+
+.admin-only.hidden{display:none!important}
+#page-inventory>.panel{overflow:hidden}
+#productsTable td,#stockMovesTable td{vertical-align:middle}
+@media(max-width:700px){#stockMovesTable table{min-width:760px}#productsTable table{min-width:650px}}
 </style>
 </head>
 <body>
@@ -30,8 +35,8 @@
  <div class="brand"><div class="brand-mark" id="mobileMark"></div><div><div class="brand-title">Giro<span>Campo</span></div><div class="brand-sub">GESTÃO INTELIGENTE DE CAMPO</div></div></div>
  <div class="eyebrow" style="margin-bottom:9px">Área de acesso</div><h2>Bem-vindo de volta</h2><p>Entre no painel de gestão da sua operação.</p>
  <div id="loginError" class="error hidden" role="alert"></div>
- <form id="loginForm"><div class="field"><label for="email">E-mail de acesso</label><input id="email" type="email" value="admin@girocampo.app" autocomplete="username" required></div><div class="field"><label for="password">Senha</label><input id="password" type="password" value="girocampo123" autocomplete="current-password" required></div><div class="login-options"><label><input type="checkbox" checked> Manter conectado</label><button type="button" class="inline-link" onclick="fillDemo()">Usar acesso demo</button></div><button type="submit" class="btn btn-primary login-submit">Entrar no GiroCampo　 →</button></form>
- <div class="demo"><strong>◈ ACESSO DE DEMONSTRAÇÃO</strong><div class="demo-line"><span>E-mail</span><code>admin@girocampo.app</code></div><div class="demo-line"><span>Senha</span><code>girocampo123</code></div></div><div class="warning">Protótipo em desenvolvimento. Login fictício, sem proteção para dados reais.<br>As alterações ficam salvas apenas neste navegador.</div>
+ <form id="loginForm"><div class="field"><label for="email">Login ou e-mail</label><input id="email" type="text" value="admin@girocampo.app" autocomplete="username" placeholder="Seu usuário ou e-mail" required></div><div class="field"><label for="password">Senha</label><input id="password" type="password" value="girocampo123" autocomplete="current-password" required></div><div class="login-options"><label><input type="checkbox" checked> Manter conectado</label><button type="button" class="inline-link" onclick="fillDemo()">Usar acesso demo</button></div><button type="submit" class="btn btn-primary login-submit">Entrar no GiroCampo　 →</button></form>
+ <div class="demo"><strong>◈ ACESSO DE DEMONSTRAÇÃO</strong><div class="demo-line"><span>Administrador</span><code>admin@girocampo.app</code></div><div class="demo-line"><span>Senha admin</span><code>girocampo123</code></div><div class="demo-line"><span>Vendedor exemplo</span><code>lucas / campo123</code></div></div><div class="warning">Protótipo local: os dados e senhas ficam neste navegador. Não use senhas reais. Para produção, ativar Supabase Auth e políticas de acesso.</div>
 </div></section>
 </div>
 <div id="app" class="hidden">
@@ -42,6 +47,7 @@
  <button class="nav-item" data-page="sellers"><span class="nav-icon">♙</span>Vendedores <span class="count" id="sellerCount">0</span></button>
  <button class="nav-item" data-page="teams"><span class="nav-icon">♧</span>Equipes</button>
  <button class="nav-item" data-page="sales"><span class="nav-icon">▤</span>Vendas <span class="count" id="saleCount">0</span></button>
+ <button class="nav-item" data-page="inventory"><span class="nav-icon">▣</span>Estoque</button>
  </nav><div class="nav-label" style="margin-top:23px">DESEMPENHO</div><nav class="nav-list">
  <button class="nav-item" data-page="goals"><span class="nav-icon">◎</span>Metas e resultados</button>
  <button class="nav-item" data-page="finance"><span class="nav-icon">◈</span>Financeiro</button>
@@ -52,7 +58,7 @@
 <main class="main"><header class="topbar"><div style="display:flex;align-items:center;gap:12px"><button class="icon-btn mobile-menu" onclick="toggleSidebar()" aria-label="Abrir menu">☰</button><div><div id="topKicker" class="top-kicker">PAINEL DE GESTÃO</div><div class="top-title" id="topTitle">Visão geral</div></div></div><div class="top-actions"><div class="date" id="todayLabel"></div><button class="icon-btn" onclick="renderAll();toast('Painel atualizado.')" title="Atualizar painel">↻</button><button class="icon-btn" title="Perfil demonstrativo">◉</button></div></header>
 <div class="content">
 <section class="page active" id="page-overview">
- <div class="page-head"><div><div class="eyebrow">RESUMO DA OPERAÇÃO</div><h1>Bom trabalho, gestor<span style="color:var(--orange)">.</span></h1><p>Acompanhe o que acontece em campo e transforme atividade em resultado.</p></div><div class="actions"><button class="btn" onclick="openModal('seller')">＋ Novo vendedor</button><button class="btn btn-primary" onclick="openModal('sale')">＋ Registrar venda</button></div></div>
+ <div class="page-head"><div><div class="eyebrow">RESUMO DA OPERAÇÃO</div><h1 id="welcomeTitle">Bom trabalho, gestor<span style="color:var(--orange)">.</span></h1><p>Acompanhe o que acontece em campo e transforme atividade em resultado.</p></div><div class="actions"><button class="btn" onclick="openModal('seller')">＋ Novo vendedor</button><button class="btn btn-primary" onclick="openModal('sale')">＋ Registrar venda</button></div></div>
  <div class="stats" id="overviewStats"></div><div class="grid-main">
  <article class="panel"><div class="panel-head"><div><div class="panel-title">Ritmo de vendas</div><div class="panel-sub">Comparativo ilustrativo ao longo da semana</div></div><span class="small muted">Esta semana</span></div><div class="panel-body"><div id="weeklyChart" class="bar-chart"></div><div class="chart-bottom"><span>Volume demonstrativo</span><strong id="weeklyTotal"></strong></div></div></article>
  <article class="panel"><div class="panel-head"><div><div class="panel-title">Destaques da equipe</div><div class="panel-sub">Quem está puxando os resultados</div></div><button class="inline-link" onclick="navigate('sellers')">Ver todos ↗</button></div><div class="panel-body"><div id="leaderboard" class="rank-list"></div><div style="border-top:1px solid #f0f1f5;margin-top:15px;padding-top:13px"><div class="chart-bottom" style="border:0;padding:0 0 8px"><span>Meta mensal da operação</span><strong id="miniGoal"></strong></div><div class="progress"><span id="miniGoalBar"></span></div></div></div></article></div>
@@ -68,6 +74,13 @@
 <section class="page" id="page-sales">
  <div class="page-head"><div><div class="eyebrow">REGISTRO COMERCIAL</div><h1>Vendas</h1><p>Registre as vendas realizadas em campo e mantenha o histórico organizado.</p></div><div class="actions"><button class="btn btn-primary" onclick="openModal('sale')">＋ Registrar venda</button></div></div>
  <div id="salesStats" class="stats"></div><article class="panel"><div class="panel-head" style="padding-bottom:15px"><div><div class="panel-title">Histórico de vendas</div><div class="panel-sub">Use os filtros para localizar um registro</div></div></div><div class="panel-body no-top"><div class="tool-row"><div class="search"><span>⌕</span><input id="salesSearch" placeholder="Buscar vendedor, produto ou código..." oninput="renderSales()"></div><div class="filters"><select id="salesTeamFilter" onchange="renderSales()"><option value="all">Todas as equipes</option></select><select id="salesStatusFilter" onchange="renderSales()"><option value="all">Todos os status</option><option>Confirmada</option><option>Pendente</option><option>Cancelada</option></select></div></div></div><div id="salesTable" class="table-wrap"></div><div id="salesFoot" class="table-foot"></div></article>
+</section>
+<section class="page" id="page-inventory">
+ <div class="page-head"><div><div class="eyebrow">PRODUTOS & MOVIMENTAÇÕES</div><h1>Estoque</h1><p>Acompanhe o saldo central, os itens distribuídos por vendedor e o histórico de movimentações.</p></div><div class="actions"><button class="btn admin-only" onclick="openModal('product')">＋ Novo produto</button><button class="btn btn-primary admin-only" onclick="openModal('movement')">＋ Movimentar estoque</button></div></div>
+ <div id="inventoryStats" class="stats"></div>
+ <article class="panel"><div class="panel-head" style="padding-bottom:15px"><div><div class="panel-title">Posição de estoque</div><div class="panel-sub">Saldo por produto no estoque central e com os vendedores</div></div><button class="btn btn-sm admin-only" onclick="exportData('inventory')">Exportar CSV</button></div><div id="productsTable" class="table-wrap"></div></article>
+ <article class="panel" style="margin-top:16px"><div class="panel-head" style="padding-bottom:15px"><div><div class="panel-title">Histórico de movimentações</div><div class="panel-sub">Entradas, transferências, devoluções, ajustes e baixas por venda</div></div></div><div id="stockMovesTable" class="table-wrap"></div><div class="table-foot" id="stockMovesFoot"></div></article>
+ <div class="note" style="margin-top:15px"><strong>Como funciona:</strong> o administrador registra entradas no estoque central e transfere produtos para cada vendedor. As vendas ligadas a um produto dão baixa automática no saldo daquele vendedor quando confirmadas. Vendas de serviços ou itens sem vínculo de estoque não alteram o inventário.</div>
 </section>
 <section class="page" id="page-goals">
  <div class="page-head"><div><div class="eyebrow">DIREÇÃO & CONSISTÊNCIA</div><h1>Metas e resultados</h1><p>Enxergue a distância até os objetivos e onde a equipe precisa acelerar.</p></div><div class="actions"><button class="btn" onclick="openModal('goal')">⚙ Ajustar meta geral</button></div></div><div id="goalStats" class="stats"></div><div class="grid-two"><article class="panel"><div class="panel-head"><div><div class="panel-title">Meta da operação</div><div class="panel-sub">Acompanhamento do objetivo mensal</div></div></div><div class="panel-body" id="mainGoal"></div></article><article class="panel"><div class="panel-head"><div><div class="panel-title">Leitura de desempenho</div><div class="panel-sub">Orientação calculada com os dados atuais</div></div></div><div class="panel-body" id="goalInsights"></div></article></div><article class="panel"><div class="panel-head" style="padding-bottom:15px"><div><div class="panel-title">Metas por equipe</div><div class="panel-sub">Resultado em relação ao objetivo demonstrativo</div></div></div><div id="teamGoalsTable" class="table-wrap"></div></article>
@@ -130,6 +143,23 @@ sales:[
 var data;
 try{data=JSON.parse(localStorage.getItem('girocampo-demo-v1')||'null')}catch(e){data=null}
 if(!data||!Array.isArray(data.sellers)||!Array.isArray(data.teams)||!Array.isArray(data.sales))data=seed();
+var currentUser=null;
+function initializeLocalModules(){
+ if(!Array.isArray(data.products)){
+  data.products=[
+   {id:'P01',name:'Kit de demonstração',sku:'DEMO-001',price:45,cost:25,minStock:5,warehouseQty:30,sellerStock:{},active:true},
+   {id:'P02',name:'Garrafa térmica',sku:'DEMO-002',price:35,cost:18,minStock:5,warehouseQty:24,sellerStock:{},active:true},
+   {id:'P03',name:'Camiseta operacional',sku:'DEMO-003',price:60,cost:32,minStock:4,warehouseQty:18,sellerStock:{},active:true}
+  ];
+  data.stockMoves=data.products.map(function(p){return {id:'MV-'+p.id,productId:p.id,type:'Entrada inicial',quantity:p.warehouseQty,sellerId:'',date:today,note:'Saldo inicial fictício do protótipo',by:'Sistema demonstrativo'}});
+ }else if(!Array.isArray(data.stockMoves)) data.stockMoves=[];
+ data.sellers.forEach(function(s){
+  if(!s.username)s.username=String(s.email||s.id).split('@')[0].toLowerCase().replace(/[^a-z0-9._-]/g,'');
+  if(!s.password)s.password='campo123';
+ });
+ data.products.forEach(function(p){if(!p.sellerStock||typeof p.sellerStock!=='object')p.sellerStock={};if(typeof p.warehouseQty!=='number')p.warehouseQty=Number(p.warehouseQty)||0;if(p.active===undefined)p.active=true;});
+}
+initializeLocalModules();
 function save(){try{localStorage.setItem('girocampo-demo-v1',JSON.stringify(data))}catch(e){toast('O navegador não conseguiu salvar as alterações.','error')}}
 function team(id){return data.teams.find(function(x){return x.id===id})}
 function seller(id){return data.sellers.find(function(x){return x.id===id})}
@@ -147,8 +177,8 @@ function pill(s){var c=s==='Ativo'||s==='Confirmada'?'good':s==='Pendente'?'pend
 function personCell(s){return '<div class="person"><div class="avatar">'+esc(initials(s.name))+'</div><div><div class="person-name">'+esc(s.name)+'</div><div class="person-meta">'+esc(s.email||s.phone||'')+'</div></div></div>'}
 function stat(label,value,ico,tone,foot){return '<article class="stat"><div class="stat-top"><span class="stat-label">'+label+'</span><span class="stat-icon '+tone+'">'+icon(ico)+'</span></div><div class="stat-value num">'+value+'</div><div class="stat-foot">'+(foot||'')+'</div></article>'}
 function salesTable(rows,actions){if(!rows.length)return '<div class="empty"><strong>Nenhum registro encontrado</strong>Altere os filtros ou cadastre um novo registro.</div>';var out='<table><thead><tr><th>Venda</th><th>Vendedor</th><th>Equipe</th><th>Data</th><th>Valor</th><th>Status</th>'+(actions?'<th>Ações</th>':'')+'</tr></thead><tbody>';rows.forEach(function(s){var p=seller(s.sellerId)||{name:'Vendedor removido'};out+='<tr><td><div class="person-name">'+esc(s.id)+'</div><div class="person-meta">'+esc(s.product)+'</div></td><td>'+personCell(p)+'</td><td>'+esc(teamName(p.teamId))+'</td><td>'+dt(s.date)+'</td><td class="amount">'+cash(s.value)+'</td><td>'+pill(s.status)+'</td>'+(actions?'<td><button class="btn btn-sm" onclick="editSale(\''+esc(s.id)+'\')">Editar</button></td>':'')+'</tr>'});return out+'</tbody></table>'}
-function renderAll(){renderOverview();renderSellers();renderTeams();renderSales();renderGoals();renderFinance();renderReports();el('sellerCount').textContent=data.sellers.length;el('saleCount').textContent=data.sales.length}
-function renderOverview(){
+function renderAllLegacy(){renderOverview();renderSellers();renderTeams();renderSales();renderGoals();renderFinance();renderReports();el('sellerCount').textContent=data.sellers.length;el('saleCount').textContent=data.sales.length}
+function renderOverviewLegacy(){
  var done=confirmed(),gross=sum(done),goal=Number(data.goal)||85000,active=data.sellers.filter(function(s){return s.status==='Ativo'}).length,todaySum=sum(done.filter(function(s){return s.date===today}));
  el('overviewStats').innerHTML=stat('Vendas confirmadas',int(done.length),'receipt','orange',data.sales.filter(function(s){return s.status==='Pendente'}).length+' aguardando confirmação')+stat('Faturamento registrado',cash(gross),'wallet','green',cash(todaySum)+' hoje')+stat('Vendedores ativos',int(active),'users','blue',data.teams.length+' equipes cadastradas')+stat('Meta mensal',pct(gross/goal*100),'target','purple',cash(Math.max(0,goal-gross))+' para alcançar');
  var days=['Seg','Ter','Qua','Qui','Sex','Sáb','Dom'],a=[9,12,8,15,13,19,16],b=[7,10,11,9,12,14,12],max=19,out='';for(var i=0;i<days.length;i++){out+='<div class="bar-col"><div class="bar-track"><div class="bar-pair"><div class="bar" style="height:'+(b[i]/max*100)+'%"></div><div class="bar current" style="height:'+(a[i]/max*100)+'%"></div></div></div><div class="bar-label">'+days[i]+'</div></div>'}el('weeklyChart').innerHTML=out;el('weeklyTotal').textContent=int(a.reduce(function(x,y){return x+y},0))+' vendas';
@@ -167,7 +197,7 @@ function renderTeams(){
  var done=confirmed();el('teamStats').innerHTML=stat('Equipes cadastradas',data.teams.length,'team','orange','Estrutura comercial')+stat('Vendedores ativos',data.sellers.filter(function(s){return s.status==='Ativo'}).length,'users','blue','Todas as equipes')+stat('Faturamento',cash(sum(done)),'wallet','green','Vendas confirmadas')+stat('Meta consolidada',cash(data.teams.reduce(function(a,t){return a+(Number(t.goal)||0)},0)),'target','purple','Objetivos das equipes');
  var out='';data.teams.forEach(function(t){var members=teamPeople(t.id),ss=teamSales(t.id),val=sum(ss),leader=seller(t.leaderId);out+='<article class="team-card"><div class="team-card-top"><div class="team-mark">'+esc(initials(t.name))+'</div>'+pill(members.filter(function(s){return s.status==='Ativo'}).length+' ativos')+'</div><h3>'+esc(t.name)+'</h3><p>'+esc(t.region||'Região não definida')+'</p><div class="team-metrics"><div><span>Faturamento</span><strong>'+cash(val)+'</strong></div><div><span>Vendas</span><strong>'+ss.length+'</strong></div></div><div class="chart-bottom" style="border:0;padding:0 0 8px"><span>Meta de equipe</span><strong>'+progress(val,t.goal)+'%</strong></div><div class="progress"><span style="width:'+progress(val,t.goal)+'%"></span></div><div style="display:flex;justify-content:space-between;align-items:center;gap:10px;margin-top:16px"><span class="small muted">'+members.length+' pessoas</span><button class="btn btn-sm" onclick="editTeam(\''+esc(t.id)+'\')">Editar equipe</button></div><div class="person-meta" style="margin-top:12px">Liderança: '+esc(leader?leader.name:'A definir')+' · Comissão padrão '+Number(t.commission||0).toLocaleString('pt-BR')+'%</div></article>'});el('teamsGrid').innerHTML=out||'<div class="panel empty"><strong>Nenhuma equipe cadastrada</strong>Crie uma equipe para organizar os vendedores.</div>';
 }
-function renderSales(){
+function renderSalesLegacy(){
  fillTeamFilters();var q=(el('salesSearch')?.value||'').toLowerCase().trim(),tf=el('salesTeamFilter')?.value||'all',sf=el('salesStatusFilter')?.value||'all',done=confirmed(),pending=data.sales.filter(function(s){return s.status==='Pendente'});el('salesStats').innerHTML=stat('Registros de venda',data.sales.length,'receipt','orange','Todos os status')+stat('Confirmadas',done.length,'check','green','Consideradas no faturamento')+stat('Faturamento',cash(sum(done)),'wallet','blue','Somente vendas confirmadas')+stat('Pendências',pending.length,'clock','purple',cash(sum(pending))+' aguardando');
  var rows=[...data.sales].filter(function(s){return (!q||[s.id,s.product,sellerName(s.sellerId)].some(function(v){return String(v).toLowerCase().includes(q)}))&&(tf==='all'||(seller(s.sellerId)&&seller(s.sellerId).teamId===tf))&&(sf==='all'||s.status===sf)}).sort(function(a,b){return b.date.localeCompare(a.date)||b.id.localeCompare(a.id)});
  el('salesTable').innerHTML=salesTable(rows,true);el('salesFoot').innerHTML='<span>Exibindo '+rows.length+' de '+data.sales.length+' registros</span><button class="inline-link" onclick="exportData(\'sales\')">Exportar CSV ↗</button>';
@@ -190,24 +220,40 @@ function renderReports(){
  var out='<table><thead><tr><th>Equipe</th><th>Vendas</th><th>Faturamento</th><th>Meta</th></tr></thead><tbody>';data.teams.forEach(function(t){out+='<tr><td><div class="person-name">'+esc(t.name)+'</div><div class="person-meta">'+esc(t.region)+'</div></td><td>'+teamSales(t.id).length+'</td><td class="amount">'+cash(sum(teamSales(t.id)))+'</td><td>'+progress(sum(teamSales(t.id)),t.goal)+'%</td></tr>'});el('reportTeamsTable').innerHTML=data.teams.length?out+'</tbody></table>':'<div class="empty">Cadastre equipes para comparar.</div>';
  var bestS=[...data.sellers].sort(function(a,b){return sum(sellerSales(b.id))-sum(sellerSales(a.id))})[0],bestT=[...data.teams].sort(function(a,b){return sum(teamSales(b.id))-sum(teamSales(a.id))})[0],pending=data.sales.filter(function(s){return s.status==='Pendente'}).length;el('reportNotes').innerHTML='<div class="note" style="margin-bottom:10px"><strong>Maior faturamento individual</strong><br>'+(bestS?esc(bestS.name)+' — '+cash(sum(sellerSales(bestS.id)))+' em vendas confirmadas.':'Ainda sem dados.')+'</div><div class="note" style="margin-bottom:10px"><strong>Equipe em destaque</strong><br>'+(bestT?esc(bestT.name)+' registra '+cash(sum(teamSales(bestT.id)))+'.':'Cadastre equipes para comparar.')+'</div><div class="note"><strong>Itens para acompanhar</strong><br>'+pending+' venda(s) pendente(s) precisam de conferência.</div>';
 }
-var pageLabels={overview:['PAINEL DE GESTÃO','Visão geral'],sellers:['PESSOAS & PERFORMANCE','Vendedores'],teams:['ESTRUTURA COMERCIAL','Equipes'],sales:['REGISTRO COMERCIAL','Vendas'],goals:['DIREÇÃO & CONSISTÊNCIA','Metas e resultados'],finance:['VISÃO FINANCEIRA','Financeiro'],reports:['ANÁLISE DA OPERAÇÃO','Relatórios']};
-function navigate(p){if(!el('page-'+p))return;document.querySelectorAll('.page').forEach(function(x){x.classList.toggle('active',x.id==='page-'+p)});document.querySelectorAll('.nav-item').forEach(function(x){x.classList.toggle('active',x.dataset.page===p)});el('topKicker').textContent=pageLabels[p][0];el('topTitle').textContent=pageLabels[p][1];closeSidebar();window.scrollTo({top:0,behavior:'smooth'})}
+var pageLabels={overview:['PAINEL DE GESTÃO','Visão geral'],sellers:['PESSOAS & PERFORMANCE','Vendedores'],teams:['ESTRUTURA COMERCIAL','Equipes'],sales:['REGISTRO COMERCIAL','Vendas'],inventory:['PRODUTOS & MOVIMENTAÇÕES','Estoque'],goals:['DIREÇÃO & CONSISTÊNCIA','Metas e resultados'],finance:['VISÃO FINANCEIRA','Financeiro'],reports:['ANÁLISE DA OPERAÇÃO','Relatórios']};
+function navigate(p){if(!el('page-'+p))return;if(currentUser&&currentUser.type==='seller'&&['sellers','teams','goals','finance','reports'].includes(p)){toast('Seu perfil não tem acesso a essa área.','error');return}document.querySelectorAll('.page').forEach(function(x){x.classList.toggle('active',x.id==='page-'+p)});document.querySelectorAll('.nav-item').forEach(function(x){x.classList.toggle('active',x.dataset.page===p)});el('topKicker').textContent=pageLabels[p][0];el('topTitle').textContent=pageLabels[p][1];closeSidebar();window.scrollTo({top:0,behavior:'smooth'})}
 document.querySelectorAll('.nav-item').forEach(function(b){b.addEventListener('click',function(){navigate(b.dataset.page)})});
 function toggleSidebar(){el('sidebar').classList.toggle('open');el('scrim').classList.toggle('show')}
 function closeSidebar(){el('sidebar').classList.remove('open');el('scrim').classList.remove('show')}
 function fillDemo(){el('email').value=demoEmail;el('password').value=demoPass;el('loginError').classList.add('hidden')}
-el('loginForm').addEventListener('submit',function(e){e.preventDefault();if(el('email').value.trim().toLowerCase()!==demoEmail||el('password').value!==demoPass){el('loginError').textContent='Dados incorretos. Use o acesso de demonstração exibido nesta tela.';el('loginError').classList.remove('hidden');return}sessionStorage.setItem('girocampo-demo-session','1');startApp()});
-function startApp(){el('loginScreen').classList.add('hidden');el('app').classList.remove('hidden');el('todayLabel').textContent=new Date().toLocaleDateString('pt-BR',{weekday:'short',day:'2-digit',month:'short',year:'numeric'}).replace('.','');renderAll()}
-function logout(){sessionStorage.removeItem('girocampo-demo-session');el('app').classList.add('hidden');el('loginScreen').classList.remove('hidden');closeSidebar()}
+el('loginForm').addEventListener('submit',function(e){
+ e.preventDefault();
+ var login=el('email').value.trim().toLowerCase(),pass=el('password').value;
+ if((login===demoEmail||login==='admin')&&pass===demoPass){
+  currentUser={type:'admin',name:'Administrador',username:'admin'};sessionStorage.setItem('girocampo-user',JSON.stringify({type:'admin'}));sessionStorage.setItem('girocampo-demo-session','1');startApp();return;
+ }
+ var s=data.sellers.find(function(x){return x.status==='Ativo'&&(String(x.username||'').toLowerCase()===login||String(x.email||'').toLowerCase()===login)&&String(x.password||'')===pass});
+ if(!s){el('loginError').textContent='Login ou senha incorretos, ou usuário inativo.';el('loginError').classList.remove('hidden');return}
+ currentUser={type:'seller',sellerId:s.id,name:s.name,username:s.username};sessionStorage.setItem('girocampo-user',JSON.stringify({type:'seller',sellerId:s.id}));sessionStorage.setItem('girocampo-demo-session','1');startApp();
+});
+function startApp(){
+ if(!currentUser){
+  try{var saved=JSON.parse(sessionStorage.getItem('girocampo-user')||'null');if(saved&&saved.type==='admin')currentUser={type:'admin',name:'Administrador',username:'admin'};else if(saved&&saved.type==='seller'){var ss=seller(saved.sellerId);if(ss&&ss.status==='Ativo')currentUser={type:'seller',sellerId:ss.id,name:ss.name,username:ss.username};}}catch(e){}
+  if(!currentUser&&sessionStorage.getItem('girocampo-demo-session')==='1')currentUser={type:'admin',name:'Administrador',username:'admin'};
+ }
+ if(!currentUser){el('loginScreen').classList.remove('hidden');el('app').classList.add('hidden');return}
+ el('loginScreen').classList.add('hidden');el('app').classList.remove('hidden');el('todayLabel').textContent=new Date().toLocaleDateString('pt-BR',{weekday:'short',day:'2-digit',month:'short',year:'numeric'}).replace('.','');renderAll();
+}
+function logout(){sessionStorage.removeItem('girocampo-demo-session');sessionStorage.removeItem('girocampo-user');currentUser=null;el('app').classList.add('hidden');el('loginScreen').classList.remove('hidden');closeSidebar();el('email').value='';el('password').value=''}
 function toast(msg,type){var t=document.createElement('div');t.className='toast';t.textContent=(type==='error'?'⚠ ':'✓ ')+msg;el('toastHost').appendChild(t);setTimeout(function(){t.remove()},3200)}
-function openModal(type,id){
+function openModalLegacy(type,id){
  var item=type==='seller'?seller(id):type==='team'?team(id):type==='sale'?data.sales.find(function(s){return s.id===id}):null,title=type==='seller'?(item?'Editar vendedor':'Cadastrar vendedor'):type==='team'?(item?'Editar equipe':'Criar equipe'):type==='sale'?(item?'Editar venda':'Registrar venda'):'Ajustar meta geral',body='';
- if(type==='seller'){body='<div class="form-grid"><div class="field full"><label>Nome completo *</label><input name="name" required maxlength="90" placeholder="Ex.: Ana Souza" value="'+esc(item?item.name:'')+'"></div><div class="field"><label>E-mail</label><input name="email" type="email" placeholder="nome@empresa.com" value="'+esc(item?item.email:'')+'"></div><div class="field"><label>Telefone</label><input name="phone" placeholder="(00) 00000-0000" value="'+esc(item?item.phone:'')+'"></div><div class="field"><label>Equipe *</label><select name="teamId" required>'+data.teams.map(function(t){return '<option value="'+esc(t.id)+'" '+(item&&item.teamId===t.id?'selected':'')+'>'+esc(t.name)+'</option>'}).join('')+'</select></div><div class="field"><label>Função</label><select name="role"><option '+(!item||item.role==='Vendedor'?'selected':'')+'>Vendedor</option><option '+(item&&item.role==='Líder de equipe'?'selected':'')+'>Líder de equipe</option><option '+(item&&item.role==='Supervisor'?'selected':'')+'>Supervisor</option></select></div><div class="field full"><label>Status</label><select name="status"><option '+(!item||item.status==='Ativo'?'selected':'')+'>Ativo</option><option '+(item&&item.status==='Inativo'?'selected':'')+'>Inativo</option></select></div></div>'}
+ if(type==='seller'){body='<div class="form-grid"><div class="field full"><label>Nome completo *</label><input name="name" required maxlength="90" placeholder="Ex.: Ana Souza" value="'+esc(item?item.name:'')+'"></div><div class="field"><label>E-mail</label><input name="email" type="email" placeholder="nome@empresa.com" value="'+esc(item?item.email:'')+'"></div><div class="field"><label>Usuário de acesso *</label><input name="username" required minlength="3" maxlength="32" autocomplete="off" placeholder="ex.: lucas" value="'+esc(item?item.username:'')+'"></div><div class="field"><label>Senha '+(item?'(deixe em branco para manter)':'*')+'</label><input name="password" type="password" '+(!item?'required minlength="6"':'minlength="6"')+' autocomplete="new-password" placeholder="'+(item?'Nova senha opcional':'Mínimo de 6 caracteres')+'"></div><div class="field"><label>Telefone</label><input name="phone" placeholder="(00) 00000-0000" value="'+esc(item?item.phone:'')+'"></div><div class="field"><label>Equipe *</label><select name="teamId" required>'+data.teams.map(function(t){return '<option value="'+esc(t.id)+'" '+(item&&item.teamId===t.id?'selected':'')+'>'+esc(t.name)+'</option>'}).join('')+'</select></div><div class="field"><label>Função</label><select name="role"><option '+(!item||item.role==='Vendedor'?'selected':'')+'>Vendedor</option><option '+(item&&item.role==='Líder de equipe'?'selected':'')+'>Líder de equipe</option><option '+(item&&item.role==='Supervisor'?'selected':'')+'>Supervisor</option></select></div><div class="field full"><label>Status</label><select name="status"><option '+(!item||item.status==='Ativo'?'selected':'')+'>Ativo</option><option '+(item&&item.status==='Inativo'?'selected':'')+'>Inativo</option></select></div></div>'}
  if(type==='team'){body='<div class="form-grid"><div class="field full"><label>Nome da equipe *</label><input name="name" required maxlength="70" placeholder="Ex.: Equipe Expansão" value="'+esc(item?item.name:'')+'"></div><div class="field full"><label>Região de atuação</label><input name="region" maxlength="90" placeholder="Ex.: Centro e entorno" value="'+esc(item?item.region:'')+'"></div><div class="field"><label>Líder</label><select name="leaderId"><option value="">A definir</option>'+data.sellers.map(function(s){return '<option value="'+esc(s.id)+'" '+(item&&item.leaderId===s.id?'selected':'')+'>'+esc(s.name)+'</option>'}).join('')+'</select></div><div class="field"><label>Comissão padrão (%)</label><input name="commission" type="number" min="0" max="100" step=".1" value="'+(item?item.commission:8)+'"></div><div class="field full"><label>Meta mensal (R$)</label><input name="goal" type="number" min="0" step=".01" value="'+(item?item.goal:20000)+'"></div></div>'}
  if(type==='sale'){var currentSeller=seller(item?item.sellerId:(data.sellers[0]||{}).id),defComm=(team(currentSeller?currentSeller.teamId:'')||{}).commission||8;body='<div class="form-grid"><div class="field"><label>Vendedor *</label><select name="sellerId" required>'+data.sellers.map(function(s){return '<option value="'+esc(s.id)+'" '+(item&&item.sellerId===s.id?'selected':'')+'>'+esc(s.name)+'</option>'}).join('')+'</select></div><div class="field"><label>Data da venda *</label><input name="date" type="date" required value="'+esc(item?item.date:today)+'"></div><div class="field full"><label>Produto / serviço *</label><input name="product" required maxlength="100" placeholder="Ex.: Plano Essencial" value="'+esc(item?item.product:'')+'"></div><div class="field"><label>Quantidade</label><input name="quantity" type="number" min="1" max="10000" step="1" value="'+(item?item.quantity:1)+'"></div><div class="field"><label>Valor total (R$) *</label><input name="value" type="number" required min=".01" step=".01" value="'+(item?item.value:'')+'"></div><div class="field"><label>Comissão (%)</label><input name="commissionRate" type="number" min="0" max="100" step=".1" value="'+(item?item.commissionRate:defComm)+'"></div><div class="field"><label>Status</label><select name="status"><option '+(!item||item.status==='Confirmada'?'selected':'')+'>Confirmada</option><option '+(item&&item.status==='Pendente'?'selected':'')+'>Pendente</option><option '+(item&&item.status==='Cancelada'?'selected':'')+'>Cancelada</option></select></div></div>'}
  if(type==='goal'){body='<div class="form-grid"><div class="field full"><label>Meta mensal da operação (R$) *</label><input name="goal" type="number" min="1" step=".01" required value="'+data.goal+'"></div></div><div class="note" style="margin-top:13px">A alteração vale somente neste protótipo e neste navegador. Metas por equipe são ajustadas na edição de cada equipe.</div>'}
  el('modalHost').innerHTML='<div class="modal-backdrop" onclick="if(event.target===this)closeModal()"><section class="modal" role="dialog" aria-modal="true"><div class="modal-head"><div><div class="eyebrow">'+(type==='seller'?'GESTÃO DE PESSOAS':type==='team'?'ESTRUTURA COMERCIAL':type==='sale'?'MOVIMENTAÇÃO COMERCIAL':'PLANEJAMENTO')+'</div><h2>'+title+'</h2><p>Preencha os dados para atualizar o ambiente demonstrativo.</p></div><button class="close" onclick="closeModal()" aria-label="Fechar">×</button></div><form id="dataForm">'+body+'<div class="form-actions"><button class="btn" type="button" onclick="closeModal()">Cancelar</button><button class="btn btn-primary" type="submit">'+(item?'Salvar alterações':'Salvar registro')+'</button></div></form></section></div>';
- el('dataForm').addEventListener('submit',function(e){e.preventDefault();var v=Object.fromEntries(new FormData(e.currentTarget).entries());if(type==='seller'){if(!data.teams.length){toast('Crie uma equipe antes de cadastrar vendedores.','error');return}if(data.sellers.some(function(s){return (!item||s.id!==item.id)&&v.email&&s.email.toLowerCase()===v.email.toLowerCase()})){toast('Já existe um vendedor com esse e-mail.','error');return}var sr={id:item?item.id:nextId('S',data.sellers),name:v.name.trim(),email:v.email.trim(),phone:v.phone.trim(),teamId:v.teamId,role:v.role,status:v.status,joined:item?item.joined:today};if(item)data.sellers=data.sellers.map(function(s){return s.id===item.id?sr:s});else data.sellers.push(sr);toast(item?'Vendedor atualizado.':'Vendedor cadastrado.')}
+ el('dataForm').addEventListener('submit',function(e){e.preventDefault();var v=Object.fromEntries(new FormData(e.currentTarget).entries());if(type==='seller'){if(!data.teams.length){toast('Crie uma equipe antes de cadastrar vendedores.','error');return}if(data.sellers.some(function(s){return (!item||s.id!==item.id)&&v.email&&String(s.email||'').toLowerCase()===v.email.trim().toLowerCase()})){toast('Já existe um vendedor com esse e-mail.','error');return}if(data.sellers.some(function(s){return (!item||s.id!==item.id)&&String(s.username||'').toLowerCase()===v.username.trim().toLowerCase()})){toast('Esse usuário de acesso já está cadastrado.','error');return}if(!item&&String(v.password||'').length<6){toast('A senha precisa ter pelo menos 6 caracteres.','error');return}var sr={id:item?item.id:nextId('S',data.sellers),name:v.name.trim(),email:v.email.trim(),username:v.username.trim().toLowerCase(),password:v.password?String(v.password):item.password,phone:v.phone.trim(),teamId:v.teamId,role:v.role,status:v.status,joined:item?item.joined:today};if(item)data.sellers=data.sellers.map(function(s){return s.id===item.id?sr:s});else data.sellers.push(sr);toast(item?'Vendedor atualizado.':'Vendedor cadastrado.')}
  else if(type==='team'){if(data.teams.some(function(t){return (!item||t.id!==item.id)&&t.name.toLowerCase()===v.name.trim().toLowerCase()})){toast('Já existe uma equipe com esse nome.','error');return}var tr={id:item?item.id:nextId('T',data.teams),name:v.name.trim(),region:v.region.trim(),leaderId:v.leaderId,commission:Math.min(100,Math.max(0,Number(v.commission)||0)),goal:Math.max(0,Number(v.goal)||0)};if(item)data.teams=data.teams.map(function(t){return t.id===item.id?tr:t});else data.teams.push(tr);toast(item?'Equipe atualizada.':'Equipe criada.')}
  else if(type==='sale'){if(!(Number(v.value)>0)||!seller(v.sellerId)){toast('Informe valor positivo e um vendedor válido.','error');return}var ss={id:item?item.id:nextSaleId(),sellerId:v.sellerId,product:v.product.trim(),quantity:Math.max(1,Number(v.quantity)||1),value:Number(v.value),status:v.status,date:v.date,commissionRate:Math.min(100,Math.max(0,Number(v.commissionRate)||0))};if(item)data.sales=data.sales.map(function(s){return s.id===item.id?ss:s});else data.sales.push(ss);toast(item?'Venda atualizada.':'Venda registrada.')}
  else if(type==='goal'){if(!(Number(v.goal)>0)){toast('A meta precisa ser maior que zero.','error');return}data.goal=Number(v.goal);toast('Meta geral atualizada.')}
@@ -217,6 +263,173 @@ function closeModal(){el('modalHost').innerHTML=''}
 function editSeller(id){openModal('seller',id)}function editTeam(id){openModal('team',id)}function editSale(id){openModal('sale',id)}
 function exportData(type){var rows=type==='sellers'?data.sellers.map(function(s){return {ID:s.id,Nome:s.name,Email:s.email,Telefone:s.phone,Equipe:teamName(s.teamId),Funcao:s.role,Status:s.status}}):type==='sales'?data.sales.map(function(s){return {ID:s.id,Vendedor:sellerName(s.sellerId),Equipe:teamName((seller(s.sellerId)||{}).teamId),Produto:s.product,Quantidade:s.quantity,Data:s.date,Valor:s.value,Comissao:s.commissionRate,Status:s.status}}):[].concat(data.sellers.map(function(s){return {Tipo:'Vendedor',ID:s.id,Nome:s.name,Equipe:teamName(s.teamId),Status:s.status}}),data.teams.map(function(t){return {Tipo:'Equipe',ID:t.id,Nome:t.name,Regiao:t.region,Meta:t.goal,Comissao:t.commission}}),data.sales.map(function(s){return {Tipo:'Venda',ID:s.id,Nome:sellerName(s.sellerId),Produto:s.product,Valor:s.value,Data:s.date,Status:s.status}}));if(!rows.length){toast('Não há dados para exportar.','error');return}var cols=[...new Set(rows.flatMap(function(r){return Object.keys(r)}))];function quote(v){return '"'+String(v==null?'':v).replace(/"/g,'""')+'"'}var csv='\uFEFF'+[cols.map(quote).join(';')].concat(rows.map(function(r){return cols.map(function(c){return quote(r[c])}).join(';')})).join('\r\n'),blob=new Blob([csv],{type:'text/csv;charset=utf-8;'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='girocampo-'+type+'-'+today+'.csv';document.body.appendChild(a);a.click();a.remove();URL.revokeObjectURL(url);toast('Arquivo CSV preparado para download.')}
 document.addEventListener('keydown',function(e){if(e.key==='Escape'){closeModal();closeSidebar()}});
+
+/* GiroCampo local-first modules: prepared for later migration to Supabase */
+function isAdmin(){return !!currentUser&&currentUser.type==='admin'}
+function loggedSeller(){return currentUser&&currentUser.type==='seller'?seller(currentUser.sellerId):null}
+function canAccessPage(p){return isAdmin()||['overview','sales','inventory'].includes(p)}
+function stockForSeller(p,sellerId){return Math.max(0,Number((p.sellerStock||{})[sellerId])||0)}
+function totalSellerStock(p){return Object.keys(p.sellerStock||{}).reduce(function(n,id){return n+Math.max(0,Number(p.sellerStock[id])||0)},0)}
+function totalStock(p){return Math.max(0,Number(p.warehouseQty)||0)+totalSellerStock(p)}
+function stockProduct(id){return data.products.find(function(p){return p.id===id})}
+function stockMoveId(){return 'MV-'+String(Date.now())+'-'+String(Math.floor(Math.random()*900+100))}
+function writeStockMove(p,type,qty,sellerId,note){
+ data.stockMoves.unshift({id:stockMoveId(),productId:p.id,type:type,quantity:Number(qty)||0,sellerId:sellerId||'',date:today,note:String(note||''),by:currentUser?(currentUser.name||currentUser.username||currentUser.type):'Sistema'});
+}
+function applyAccess(){
+ document.querySelectorAll('.nav-item').forEach(function(b){b.classList.toggle('hidden',!canAccessPage(b.dataset.page))});
+ document.querySelectorAll('button[onclick]').forEach(function(b){
+  var a=b.getAttribute('onclick')||'';
+  var restricted=/openModal\\('(seller|team|product|movement|goal)'/.test(a)||/exportData\\('all'\\)/.test(a)||/navigate\\('(sellers|teams|goals|finance|reports)'/.test(a);
+  b.classList.toggle('hidden',!isAdmin()&&restricted);
+ });
+ var su=el('sidebar').querySelector('.side-user');
+ if(su){su.querySelector('.avatar').textContent=esc(initials(currentUser.name));su.querySelector('strong').textContent=currentUser.name;su.querySelector('small').textContent=isAdmin()?'Administrador · Local':'Vendedor · '+(teamName((loggedSeller()||{}).teamId));}
+ var note=el('sidebar').querySelector('.side-note');if(note)note.classList.toggle('hidden',!isAdmin());
+ var welcome=el('welcomeTitle');if(welcome)welcome.innerHTML=(isAdmin()?'Bom trabalho, gestor':'Bom trabalho, '+esc(currentUser.name))+'<span style="color:var(--orange)">.</span>';
+}
+function navigate(p){
+ if(!el('page-'+p))return;
+ if(!canAccessPage(p)){toast('Seu perfil não tem acesso a essa área.','error');return}
+ document.querySelectorAll('.page').forEach(function(x){x.classList.toggle('active',x.id==='page-'+p)});
+ document.querySelectorAll('.nav-item').forEach(function(x){x.classList.toggle('active',x.dataset.page===p)});
+ el('topKicker').textContent=pageLabels[p][0];el('topTitle').textContent=pageLabels[p][1];closeSidebar();window.scrollTo({top:0,behavior:'smooth'});
+}
+function renderAll(){
+ renderAllLegacy();renderInventory();applyAccess();
+}
+function renderOverview(){
+ if(isAdmin()){renderOverviewLegacy();return;}
+ var mine=data.sales.filter(function(x){return x.sellerId===currentUser.sellerId}),done=mine.filter(function(x){return x.status==='Confirmada'}),gross=sum(done),pending=mine.filter(function(x){return x.status==='Pendente'}),myItems=data.products.reduce(function(n,p){return n+stockForSeller(p,currentUser.sellerId)},0);
+ el('overviewStats').innerHTML=stat('Minhas vendas',int(mine.length),'receipt','orange',pending.length+' pendentes')+stat('Faturamento confirmado',cash(gross),'wallet','green','Somente suas vendas')+stat('Itens sob minha responsabilidade',int(myItems),'team','blue','Estoque atribuído')+stat('Produtos no catálogo',int(data.products.filter(function(p){return p.active}).length),'target','purple','Itens ativos');
+ el('weeklyChart').innerHTML='<div class="empty"><strong>Seu ritmo de vendas</strong>Os indicadores refletem apenas seus registros no sistema.</div>';
+ el('weeklyTotal').textContent=int(mine.length)+' registros';
+ el('leaderboard').innerHTML='<div class="rank"><div class="rank-person">'+esc(initials(currentUser.name))+'</div><div class="rank-main"><strong>'+esc(currentUser.name)+'</strong><small>Seu resultado confirmado</small><div class="progress"><span style="width:'+(mine.length?Math.min(100,done.length/mine.length*100):0)+'%"></span></div></div><div class="rank-val"><strong>'+cash(gross)+'</strong><small>'+done.length+' confirmadas</small></div></div>';
+ el('miniGoal').textContent='Acompanhe suas vendas';el('miniGoalBar').style.width='0%';
+ el('recentTable').innerHTML=salesTable(mine.slice().sort(function(a,b){return b.date.localeCompare(a.date)}).slice(0,6),false);
+}
+function renderSales(){
+ if(isAdmin()){renderSalesLegacy();return}
+ var mine=data.sales.filter(function(s){return s.sellerId===currentUser.sellerId}),q=(el('salesSearch')?.value||'').toLowerCase().trim(),sf=el('salesStatusFilter')?.value||'all';
+ var done=mine.filter(function(s){return s.status==='Confirmada'}),pending=mine.filter(function(s){return s.status==='Pendente'});
+ el('salesStats').innerHTML=stat('Minhas vendas',mine.length,'receipt','orange','Todos os status')+stat('Confirmadas',done.length,'check','green','Consideradas no total')+stat('Faturamento',cash(sum(done)),'wallet','blue','Somente suas vendas')+stat('Pendências',pending.length,'clock','purple',cash(sum(pending))+' aguardando');
+ var rows=mine.filter(function(s){return (!q||[s.id,s.product].some(function(v){return String(v||'').toLowerCase().includes(q)}))&&(sf==='all'||s.status===sf)}).sort(function(a,b){return b.date.localeCompare(a.date)||b.id.localeCompare(a.id)});
+ el('salesTable').innerHTML=salesTable(rows,true);el('salesFoot').innerHTML='<span>Exibindo '+rows.length+' de '+mine.length+' registros pessoais</span>';
+}
+function renderInventory(){
+ if(!el('productsTable'))return;
+ var own=loggedSeller(),products=data.products.filter(function(p){return isAdmin()||p.active});
+ var central=products.reduce(function(n,p){return n+(Number(p.warehouseQty)||0)},0);
+ var issued=products.reduce(function(n,p){return n+(isAdmin()?totalSellerStock(p):stockForSeller(p,own.id))},0);
+ var low=products.filter(function(p){return isAdmin()?totalStock(p)<=Number(p.minStock||0):stockForSeller(p,own.id)<=Number(p.minStock||0)}).length;
+ el('inventoryStats').innerHTML=isAdmin()
+  ?stat('Estoque central',int(central),'team','orange','Unidades disponíveis')+stat('Com vendedores',int(issued),'users','blue','Unidades distribuídas')+stat('Estoque total',int(central+issued),'receipt','green','Central + equipes')+stat('Atenção de estoque',int(low),'target','purple','Produtos no limite')
+  :stat('Meu estoque atribuído',int(issued),'team','orange','Unidades em sua responsabilidade')+stat('Produtos disponíveis',int(products.filter(function(p){return stockForSeller(p,own.id)>0}).length),'receipt','green','Com saldo para venda')+stat('Atenção de estoque',int(low),'target','purple','Produtos no limite')+stat('Movimentações',int(data.stockMoves.filter(function(m){return m.sellerId===own.id}).length),'chart','blue','Ligadas ao seu estoque');
+ var rows=products.slice().sort(function(a,b){return a.name.localeCompare(b.name)});
+ var out='';
+ if(!rows.length)out='<div class="empty"><strong>Nenhum produto cadastrado</strong>Cadastre produtos para começar a controlar os saldos.</div>';
+ else{
+  out='<table><thead><tr><th>Produto</th><th>SKU</th>'+(isAdmin()?'<th>Estoque central</th>':'')+'<th>'+(isAdmin()?'Com vendedores':'Seu saldo')+'</th><th>'+(isAdmin()?'Total geral':'Situação')+'</th><th>Estoque mínimo</th><th>Status</th>'+(isAdmin()?'<th>Ações</th>':'')+'</tr></thead><tbody>';
+  rows.forEach(function(p){
+   var sellerQty=isAdmin()?totalSellerStock(p):stockForSeller(p,own.id),all=totalStock(p),level=(isAdmin()?all:sellerQty)<=Number(p.minStock||0),status=p.active?'Ativo':'Inativo';
+   out+='<tr><td><div class="person-name">'+esc(p.name)+'</div><div class="person-meta">'+cash(p.price)+' por unidade</div></td><td>'+esc(p.sku||'—')+'</td>'+(isAdmin()?'<td class="amount">'+int(p.warehouseQty)+'</td>':'')+'<td class="amount">'+int(sellerQty)+'</td><td>'+(isAdmin()?'<strong>'+int(all)+'</strong>':(level?'<span class="pill pending">Baixo</span>':'<span class="pill good">Disponível</span>'))+'</td><td>'+int(p.minStock||0)+'</td><td>'+pill(status)+'</td>'+(isAdmin()?'<td><button class="btn btn-sm" onclick="openModal(\'product\',\''+esc(p.id)+'\')">Editar</button></td>':'')+'</tr>';
+  });
+  out+='</tbody></table>';
+ }
+ el('productsTable').innerHTML=out;
+ var moves=data.stockMoves.filter(function(m){return isAdmin()||m.sellerId===own.id}).slice().sort(function(a,b){return String(b.date).localeCompare(String(a.date))}).slice(0,100);
+ var mout='';
+ if(!moves.length)mout='<div class="empty"><strong>Sem movimentações registradas</strong>As entradas e transferências aparecerão aqui.</div>';
+ else{
+  mout='<table><thead><tr><th>Data</th><th>Movimentação</th><th>Produto</th><th>Quantidade</th><th>Vendedor</th><th>Responsável</th><th>Observação</th></tr></thead><tbody>';
+  moves.forEach(function(m){var p=stockProduct(m.productId),ss=seller(m.sellerId);mout+='<tr><td>'+dt(m.date)+'</td><td>'+esc(m.type)+'</td><td>'+esc(p?p.name:'Produto removido')+'</td><td class="amount">'+int(m.quantity)+'</td><td>'+esc(ss?ss.name:(m.sellerId?'Vendedor não encontrado':'Estoque central'))+'</td><td>'+esc(m.by||'—')+'</td><td>'+esc(m.note||'—')+'</td></tr>'});
+  mout+='</tbody></table>';
+ }
+ el('stockMovesTable').innerHTML=mout;el('stockMovesFoot').innerHTML='<span>Exibindo '+moves.length+' movimentações'+(isAdmin()?'':' associadas a você')+'</span>';
+}
+function openModal(type,id){
+ if(!currentUser){toast('Entre no sistema para continuar.','error');return}
+ if(['seller','team','product','movement','goal'].includes(type)&&!isAdmin()){toast('Apenas o administrador pode executar esta ação.','error');return}
+ if(type==='seller'||type==='team'||type==='goal'){openModalLegacy(type,id);return}
+ if(type==='product'){openProductModal(id);return}
+ if(type==='movement'){openMovementModal();return}
+ if(type==='sale'){openSaleModal(id);return}
+}
+function openProductModal(id){
+ var p=stockProduct(id),body='<div class="form-grid"><div class="field full"><label>Nome do produto *</label><input name="name" required maxlength="90" value="'+esc(p?p.name:'')+'" placeholder="Nome para identificação"></div><div class="field"><label>SKU / código</label><input name="sku" maxlength="40" value="'+esc(p?p.sku:'')+'" placeholder="Código interno"></div><div class="field"><label>Preço de venda (R$) *</label><input name="price" type="number" min=".01" step=".01" required value="'+(p?p.price:'')+'"></div><div class="field"><label>Custo unitário (R$)</label><input name="cost" type="number" min="0" step=".01" value="'+(p?p.cost||0:0)+'"></div><div class="field"><label>Estoque mínimo</label><input name="minStock" type="number" min="0" step="1" value="'+(p?p.minStock:5)+'"></div><div class="field"><label>Estoque inicial '+(p?'(não altera o saldo)':'')+'</label><input name="initialQty" type="number" min="0" step="1" value="'+(p?0:0)+'" '+(p?'disabled':'')+'></div><div class="field"><label>Status</label><select name="active"><option value="true" '+(!p||p.active?'selected':'')+'>Ativo</option><option value="false" '+(p&&!p.active?'selected':'')+'>Inativo</option></select></div></div>';
+ el('modalHost').innerHTML='<div class="modal-backdrop" onclick="if(event.target===this)closeModal()"><section class="modal" role="dialog" aria-modal="true"><div class="modal-head"><div><div class="eyebrow">CATÁLOGO & ESTOQUE</div><h2>'+(p?'Editar produto':'Cadastrar produto')+'</h2><p>O saldo é controlado pelo histórico de movimentações.</p></div><button class="close" onclick="closeModal()" aria-label="Fechar">×</button></div><form id="dataForm">'+body+'<div class="form-actions"><button class="btn" type="button" onclick="closeModal()">Cancelar</button><button class="btn btn-primary" type="submit">Salvar produto</button></div></form></section></div>';
+ el('dataForm').addEventListener('submit',function(e){
+  e.preventDefault();var v=Object.fromEntries(new FormData(e.currentTarget).entries()),sku=v.sku.trim();
+  if(Number(v.price)<=0){toast('O preço precisa ser maior que zero.','error');return}
+  if(sku&&data.products.some(function(x){return x.id!==(p&&p.id)&&String(x.sku||'').toLowerCase()===sku.toLowerCase()})){toast('Já existe um produto com esse código.','error');return}
+  if(p){p.name=v.name.trim();p.sku=sku;p.price=Number(v.price);p.cost=Math.max(0,Number(v.cost)||0);p.minStock=Math.max(0,Number(v.minStock)||0);p.active=v.active==='true';}
+  else{
+   if(data.products.some(function(x){return x.name.toLowerCase()===v.name.trim().toLowerCase()})){toast('Já existe um produto com esse nome.','error');return}
+   var initial=Math.max(0,Math.floor(Number(v.initialQty)||0)),np={id:nextId('P',data.products),name:v.name.trim(),sku:sku||nextId('SKU',data.products),price:Number(v.price),cost:Math.max(0,Number(v.cost)||0),minStock:Math.max(0,Math.floor(Number(v.minStock)||0)),warehouseQty:initial,sellerStock:{},active:v.active==='true'};
+   data.products.push(np);if(initial)writeStockMove(np,'Entrada inicial',initial,'','Saldo inicial cadastrado');
+  }
+  save();closeModal();renderAll();navigate('inventory');toast('Produto salvo.');
+ });
+}
+function openMovementModal(){
+ var productOptions=data.products.filter(function(p){return p.active}).map(function(p){return '<option value="'+esc(p.id)+'">'+esc(p.name)+' · central: '+int(p.warehouseQty)+'</option>'}).join('');
+ var sellerOptions=data.sellers.filter(function(s){return s.status==='Ativo'}).map(function(s){return '<option value="'+esc(s.id)+'">'+esc(s.name)+'</option>'}).join('');
+ var body='<div class="form-grid"><div class="field full"><label>Produto *</label><select name="productId" required>'+productOptions+'</select></div><div class="field full"><label>Tipo de movimentação *</label><select name="type" required><option value="entry">Entrada no estoque central</option><option value="transfer">Transferência para vendedor</option><option value="return">Devolução do vendedor ao estoque central</option><option value="adjust_out">Baixa / ajuste de estoque central</option></select></div><div class="field"><label>Quantidade *</label><input name="quantity" type="number" min="1" step="1" required value="1"></div><div class="field"><label>Vendedor relacionado</label><select name="sellerId"><option value="">Selecione se necessário</option>'+sellerOptions+'</select></div><div class="field full"><label>Motivo / observação *</label><input name="note" required maxlength="180" placeholder="Ex.: reposição, entrega de mercadoria, avaria"></div></div>';
+ el('modalHost').innerHTML='<div class="modal-backdrop" onclick="if(event.target===this)closeModal()"><section class="modal" role="dialog" aria-modal="true"><div class="modal-head"><div><div class="eyebrow">CONTROLE DE MOVIMENTAÇÃO</div><h2>Movimentar estoque</h2><p>Todos os lançamentos ficam registrados no histórico local.</p></div><button class="close" onclick="closeModal()" aria-label="Fechar">×</button></div><form id="dataForm">'+body+'<div class="form-actions"><button class="btn" type="button" onclick="closeModal()">Cancelar</button><button class="btn btn-primary" type="submit">Registrar movimentação</button></div></form></section></div>';
+ el('dataForm').addEventListener('submit',function(e){
+  e.preventDefault();var v=Object.fromEntries(new FormData(e.currentTarget).entries()),p=stockProduct(v.productId),qty=Math.floor(Number(v.quantity)||0),sid=v.sellerId;
+  if(!p||qty<1){toast('Selecione um produto e uma quantidade válida.','error');return}
+  if(v.type==='entry'){p.warehouseQty+=qty;writeStockMove(p,'Entrada no estoque central',qty,'',v.note)}
+  else if(v.type==='transfer'){if(!sid){toast('Selecione o vendedor que receberá os itens.','error');return}if(Number(p.warehouseQty)<qty){toast('Estoque central insuficiente para essa transferência.','error');return}p.warehouseQty-=qty;p.sellerStock[sid]=(Number(p.sellerStock[sid])||0)+qty;writeStockMove(p,'Transferência para vendedor',qty,sid,v.note)}
+  else if(v.type==='return'){if(!sid){toast('Selecione o vendedor que devolverá os itens.','error');return}if(stockForSeller(p,sid)<qty){toast('O vendedor não possui essa quantidade em estoque.','error');return}p.sellerStock[sid]-=qty;p.warehouseQty+=qty;writeStockMove(p,'Devolução ao estoque central',qty,sid,v.note)}
+  else if(v.type==='adjust_out'){if(Number(p.warehouseQty)<qty){toast('O estoque central não possui essa quantidade.','error');return}p.warehouseQty-=qty;writeStockMove(p,'Baixa / ajuste do estoque central',qty,'',v.note)}
+  save();closeModal();renderAll();navigate('inventory');toast('Movimentação registrada.');
+ });
+}
+function updateSaleProductFields(){
+ var f=el('dataForm');if(!f)return;var sel=f.elements.productId,p=sel&&sel.value?stockProduct(sel.value):null,q=Math.max(1,Number(f.elements.quantity.value)||1);
+ if(p){f.elements.product.value=p.name;f.elements.value.value=(Number(p.price)*q).toFixed(2)}
+}
+function openSaleModal(id){
+ var item=id?data.sales.find(function(x){return x.id===id}):null;
+ if(item&&item.inventoryProductId){toast('Vendas que deram baixa no estoque não podem ser editadas neste protótipo. Faça um estorno/ajuste registrado.','error');return}
+ var own=loggedSeller(),sellerOptions=isAdmin()?data.sellers.filter(function(s){return s.status==='Ativo'}).map(function(s){return '<option value="'+esc(s.id)+'" '+(item&&item.sellerId===s.id?'selected':'')+'>'+esc(s.name)+'</option>'}).join(''):'<option value="'+esc(own.id)+'" selected>'+esc(own.name)+'</option>';
+ var productOptions='<option value="">Venda sem produto de estoque (serviço / item avulso)</option>'+data.products.filter(function(p){return p.active}).map(function(p){var av=isAdmin()?totalStock(p):stockForSeller(p,own.id);return '<option value="'+esc(p.id)+'" '+(item&&item.inventoryProductId===p.id?'selected':'')+'>'+esc(p.name)+' · '+(isAdmin()?'estoque total: '+int(av):'seu saldo: '+int(av))+'</option>'}).join('');
+ var curSeller=seller(item?item.sellerId:(own?own.id:(data.sellers[0]||{}).id)),defComm=(team(curSeller?curSeller.teamId:'')||{}).commission||8;
+ var body='<div class="form-grid">'+(isAdmin()?'<div class="field full"><label>Vendedor responsável *</label><select name="sellerId" required>'+sellerOptions+'</select></div>':'<input name="sellerId" type="hidden" value="'+esc(own.id)+'">')+'<div class="field full"><label>Produto do estoque (opcional)</label><select name="productId" onchange="updateSaleProductFields()">'+productOptions+'</select><small class="muted">Ao escolher um produto, o valor unitário é preenchido automaticamente e o saldo do vendedor será baixado se a venda for confirmada.</small></div><div class="field full"><label>Produto / serviço descrito *</label><input name="product" required maxlength="100" placeholder="Descreva a venda" value="'+esc(item?item.product:'')+'"></div><div class="field"><label>Quantidade *</label><input name="quantity" type="number" min="1" max="10000" step="1" required value="'+(item?item.quantity:1)+'" oninput="updateSaleProductFields()"></div><div class="field"><label>Valor total (R$) *</label><input name="value" type="number" min=".01" step=".01" required value="'+(item?item.value:'')+'"></div><div class="field"><label>Data da venda *</label><input name="date" type="date" required value="'+esc(item?item.date:today)+'"></div><div class="field"><label>Comissão (%)</label><input name="commissionRate" type="number" min="0" max="100" step=".1" value="'+(item?item.commissionRate:defComm)+'"></div><div class="field"><label>Status</label><select name="status"><option '+(!item||item.status==='Confirmada'?'selected':'')+'>Confirmada</option><option '+(item&&item.status==='Pendente'?'selected':'')+'>Pendente</option><option '+(item&&item.status==='Cancelada'?'selected':'')+'>Cancelada</option></select></div></div>';
+ el('modalHost').innerHTML='<div class="modal-backdrop" onclick="if(event.target===this)closeModal()"><section class="modal" role="dialog" aria-modal="true"><div class="modal-head"><div><div class="eyebrow">REGISTRO COMERCIAL</div><h2>'+(item?'Editar venda':'Registrar venda')+'</h2><p>As vendas ficam vinculadas ao responsável autenticado.</p></div><button class="close" onclick="closeModal()" aria-label="Fechar">×</button></div><form id="dataForm">'+body+'<div class="form-actions"><button class="btn" type="button" onclick="closeModal()">Cancelar</button><button class="btn btn-primary" type="submit">Salvar venda</button></div></form></section></div>';
+ if(el('dataForm').elements.productId.value)updateSaleProductFields();
+ el('dataForm').addEventListener('submit',function(e){
+  e.preventDefault();var v=Object.fromEntries(new FormData(e.currentTarget).entries()),p=v.productId?stockProduct(v.productId):null,sid=isAdmin()?v.sellerId:own.id,qty=Math.floor(Number(v.quantity)||0),old=item;
+  if(!seller(sid)||!seller(sid)||!(Number(v.value)>0)||qty<1||!String(v.product||'').trim()){toast('Revise vendedor, produto, quantidade e valor.','error');return}
+  if(p&&v.status==='Confirmada'){
+   var available=stockForSeller(p,sid);
+   if(available<qty){toast('Estoque insuficiente para esse vendedor. Transfira os itens antes de confirmar a venda.','error');return}
+  }
+  if(p&&v.status==='Confirmada'){p.sellerStock[sid]=stockForSeller(p,sid)-qty;writeStockMove(p,'Baixa por venda',qty,sid,'Venda '+(old?old.id:'nova')+' · '+String(v.product).trim())}
+  var sale={id:old?old.id:nextSaleId(),sellerId:sid,product:String(v.product).trim(),quantity:qty,value:Number(v.value),status:v.status,date:v.date,commissionRate:Math.min(100,Math.max(0,Number(v.commissionRate)||0)),inventoryProductId:p?p.id:null};
+  if(old)data.sales=data.sales.map(function(x){return x.id===old.id?sale:x});else data.sales.push(sale);
+  save();closeModal();renderAll();navigate('sales');toast(old?'Venda atualizada.':'Venda registrada.');
+ });
+}
+function closeModal(){el('modalHost').innerHTML=''}
+function renderSales(){if(isAdmin()){renderSalesLegacy();return}}
+function exportData(type){
+ if(type==='inventory'){
+  var rows=data.products.map(function(p){return {Produto:p.name,SKU:p.sku,Preco:p.price,Custo:p.cost,EstoqueCentral:p.warehouseQty,EstoqueVendedores:totalSellerStock(p),EstoqueTotal:totalStock(p),EstoqueMinimo:p.minStock,Ativo:p.active?'Sim':'Não'}});
+  downloadRows(rows,'estoque');return;
+ }
+ if(!isAdmin()&&type!=='sales'){toast('Seu perfil não pode exportar esse relatório.','error');return}
+ var rows=type==='sellers'?data.sellers.map(function(s){return {ID:s.id,Nome:s.name,Usuario:s.username,Email:s.email,Telefone:s.phone,Equipe:teamName(s.teamId),Funcao:s.role,Status:s.status}}):type==='sales'?data.sales.filter(function(s){return isAdmin()||s.sellerId===currentUser.sellerId}).map(function(s){return {ID:s.id,Vendedor:sellerName(s.sellerId),Equipe:teamName((seller(s.sellerId)||{}).teamId),Produto:s.product,Quantidade:s.quantity,Data:s.date,Valor:s.value,Comissao:s.commissionRate,Status:s.status}}):[].concat(data.sellers.map(function(s){return {Tipo:'Vendedor',ID:s.id,Nome:s.name,Equipe:teamName(s.teamId),Status:s.status}}),data.teams.map(function(t){return {Tipo:'Equipe',ID:t.id,Nome:t.name,Regiao:t.region,Meta:t.goal,Comissao:t.commission}}),data.sales.map(function(s){return {Tipo:'Venda',ID:s.id,Nome:sellerName(s.sellerId),Produto:s.product,Valor:s.value,Data:s.date,Status:s.status}}));
+ if(!rows.length){toast('Não há dados para exportar.','error');return}downloadRows(rows,type);
+}
+function downloadRows(rows,type){
+ var cols=[...new Set(rows.flatMap(function(r){return Object.keys(r)}))];
+ function quote(v){return '"'+String(v==null?'':v).replace(/"/g,'""')+'"'}
+ var csv='\uFEFF'+[cols.map(quote).join(';')].concat(rows.map(function(r){return cols.map(function(c){return quote(r[c])}).join(';')})).join('\r\n'),blob=new Blob([csv],{type:'text/csv;charset=utf-8;'}),url=URL.createObjectURL(blob),a=document.createElement('a');
+ a.href=url;a.download='girocampo-'+type+'-'+today+'.csv';document.body.appendChild(a);a.click();a.remove();URL.revokeObjectURL(url);toast('Arquivo CSV preparado para download.');
+}
+
 if(sessionStorage.getItem('girocampo-demo-session')==='1')startApp();
 </script>
 </body>
