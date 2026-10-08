@@ -1,2 +1,16 @@
 [build]
+  base = "."
   publish = "."
+  command = "test -f index.html"
+
+[context.production]
+  publish = "."
+  command = "test -f index.html"
+
+[context.deploy-preview]
+  publish = "."
+  command = "test -f index.html"
+
+[context.branch-deploy]
+  publish = "."
+  command = "test -f index.html"
