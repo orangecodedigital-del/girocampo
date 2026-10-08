@@ -1,16 +1,16 @@
 [build]
   base = "."
-  publish = "."
-  command = "test -f index.html"
+  command = "mkdir -p dist && cp index.html dist/index.html"
+  publish = "dist"
 
 [context.production]
-  publish = "."
-  command = "test -f index.html"
+  command = "mkdir -p dist && cp index.html dist/index.html"
+  publish = "dist"
 
 [context.deploy-preview]
-  publish = "."
-  command = "test -f index.html"
+  command = "mkdir -p dist && cp index.html dist/index.html"
+  publish = "dist"
 
 [context.branch-deploy]
-  publish = "."
-  command = "test -f index.html"
+  command = "mkdir -p dist && cp index.html dist/index.html"
+  publish = "dist"
