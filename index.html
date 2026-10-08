@@ -280,7 +280,7 @@ function applyAccess(){
  document.querySelectorAll('.nav-item').forEach(function(b){b.classList.toggle('hidden',!canAccessPage(b.dataset.page))});
  document.querySelectorAll('button[onclick]').forEach(function(b){
   var a=b.getAttribute('onclick')||'';
-  var restricted=/openModal\\('(seller|team|product|movement|goal)'/.test(a)||/exportData\\('all'\\)/.test(a)||/navigate\\('(sellers|teams|goals|finance|reports)'/.test(a);
+  var restricted=["openModal('seller'","openModal('team'","openModal('product'","openModal('movement'","openModal('goal'","exportData('all'","navigate('sellers'","navigate('teams'","navigate('goals'","navigate('finance'","navigate('reports'"].some(function(token){return a.indexOf(token)>=0});
   b.classList.toggle('hidden',!isAdmin()&&restricted);
  });
  var su=el('sidebar').querySelector('.side-user');
@@ -413,7 +413,6 @@ function openSaleModal(id){
  });
 }
 function closeModal(){el('modalHost').innerHTML=''}
-function renderSales(){if(isAdmin()){renderSalesLegacy();return}}
 function exportData(type){
  if(type==='inventory'){
   var rows=data.products.map(function(p){return {Produto:p.name,SKU:p.sku,Preco:p.price,Custo:p.cost,EstoqueCentral:p.warehouseQty,EstoqueVendedores:totalSellerStock(p),EstoqueTotal:totalStock(p),EstoqueMinimo:p.minStock,Ativo:p.active?'Sim':'Não'}});
