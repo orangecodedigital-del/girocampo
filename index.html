@@ -176,7 +176,7 @@ function nextSaleId(){return 'GC-'+(Math.max(1068,...data.sales.map(function(s){
 function pill(s){var c=s==='Ativo'||s==='Confirmada'?'good':s==='Pendente'?'pending':s==='Inativo'||s==='Cancelada'?'neutral':'info';return '<span class="pill '+c+'">'+esc(s)+'</span>'}
 function personCell(s){return '<div class="person"><div class="avatar">'+esc(initials(s.name))+'</div><div><div class="person-name">'+esc(s.name)+'</div><div class="person-meta">'+esc(s.email||s.phone||'')+'</div>'+(isAdmin()&&s.username?'<div class="person-meta">Login: '+esc(s.username)+'</div>':'')+'</div></div>'}
 function stat(label,value,ico,tone,foot){return '<article class="stat"><div class="stat-top"><span class="stat-label">'+label+'</span><span class="stat-icon '+tone+'">'+icon(ico)+'</span></div><div class="stat-value num">'+value+'</div><div class="stat-foot">'+(foot||'')+'</div></article>'}
-function salesTable(rows,actions){if(!rows.length)return '<div class="empty"><strong>Nenhum registro encontrado</strong>Altere os filtros ou cadastre um novo registro.</div>';var out='<table><thead><tr><th>Venda</th><th>Vendedor</th><th>Equipe</th><th>Data</th><th>Valor</th><th>Status</th>'+(actions?'<th>Ações</th>':'')+'</tr></thead><tbody>';rows.forEach(function(s){var p=seller(s.sellerId)||{name:'Vendedor removido'};out+='<tr><td><div class="person-name">'+esc(s.id)+'</div><div class="person-meta">'+esc(s.product)+'</div></td><td>'+personCell(p)+'</td><td>'+esc(teamName(p.teamId))+'</td><td>'+dt(s.date)+'</td><td class="amount">'+cash(s.value)+'</td><td>'+pill(s.status)+'</td>'+(actions?'<td><button class="btn btn-sm" onclick="editSale(\''+esc(s.id)+'\')">Editar</button></td>':'')+'</tr>'});return out+'</tbody></table>'}
+function salesTable(rows,actions){if(!rows.length)return '<div class="empty"><strong>Nenhum registro encontrado</strong>Altere os filtros ou cadastre um novo registro.</div>';var out='<table><thead><tr><th>Venda</th><th>Vendedor</th><th>Equipe</th><th>Data</th><th>Valor</th><th>Status</th>'+(actions?'<th>Ações</th>':'')+'</tr></thead><tbody>';rows.forEach(function(s){var p=seller(s.sellerId)||{name:'Vendedor removido'};out+='<tr><td><div class="person-name">'+esc(s.id)+'</div><div class="person-meta">'+esc(s.product)+'</div></td><td>'+personCell(p)+'</td><td>'+esc(teamName(p.teamId))+'</td><td>'+dt(s.date)+'</td><td class="amount">'+cash(s.value)+'</td><td>'+pill(s.status)+'</td>'+(actions?'<td>'+(s.inventoryProductId&&s.status==='Confirmada'?'<button class="btn btn-sm" onclick="reverseInventorySale(\''+esc(s.id)+'\')">Estornar</button>':'<button class="btn btn-sm" onclick="editSale(\''+esc(s.id)+'\')">Editar</button>')+'</td>':'')+'</tr>'});return out+'</tbody></table>'}
 function renderAllLegacy(){renderOverview();renderSellers();renderTeams();renderSales();renderGoals();renderFinance();renderReports();el('sellerCount').textContent=data.sellers.length;el('saleCount').textContent=data.sales.length}
 function renderOverviewLegacy(){
  var done=confirmed(),gross=sum(done),goal=Number(data.goal)||85000,active=data.sellers.filter(function(s){return s.status==='Ativo'}).length,todaySum=sum(done.filter(function(s){return s.date===today}));
@@ -411,6 +411,18 @@ function openSaleModal(id){
   if(old)data.sales=data.sales.map(function(x){return x.id===old.id?sale:x});else data.sales.push(sale);
   save();closeModal();renderAll();navigate('sales');toast(old?'Venda atualizada.':'Venda registrada.');
  });
+}
+function reverseInventorySale(id){
+ var item=data.sales.find(function(x){return x.id===id});
+ if(!item||!item.inventoryProductId||item.status!=='Confirmada'){toast('Esta venda não tem uma baixa de estoque ativa.','error');return}
+ if(!isAdmin()&&(!currentUser||item.sellerId!==currentUser.sellerId)){toast('Você só pode estornar suas próprias vendas.','error');return}
+ var p=stockProduct(item.inventoryProductId);
+ if(!p){toast('O produto vinculado não foi encontrado.','error');return}
+ if(!window.confirm('Estornar a venda '+item.id+' e devolver '+item.quantity+' unidade(s) ao estoque do vendedor?'))return;
+ p.sellerStock[item.sellerId]=stockForSeller(p,item.sellerId)+Number(item.quantity||0);
+ writeStockMove(p,'Estorno de venda',item.quantity,item.sellerId,'Estorno da venda '+item.id);
+ item.status='Cancelada';item.reversedAt=today;
+ save();renderAll();navigate('sales');toast('Venda estornada e estoque devolvido.');
 }
 function closeModal(){el('modalHost').innerHTML=''}
 function exportData(type){
